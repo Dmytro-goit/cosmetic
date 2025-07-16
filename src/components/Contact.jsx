@@ -1,4 +1,7 @@
-import React from "react";
+import * as yup from "yup";
+import { useDispatch } from "react-redux";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import { setFormValues } from "../store/formSlice";
 import {
   FaClock,
   FaMapMarkerAlt,
@@ -7,7 +10,26 @@ import {
 } from "react-icons/fa";
 import contactImg from "../assets/contactImg.png";
 
+const validationSchema = yup.object().shape({
+  name: yup
+    .string()
+    .min(2, "Name is entered incorrectly")
+    .required("Name is required"),
+  phone: yup.string().required("Phone is required"),
+  email: yup
+    .string()
+    .email("Invalid email format")
+    .required("Email is required"),
+  service: yup.string().required("Service selection is required"),
+  message: yup
+    .string()
+    .min(10, "Message is too short")
+    .max(50, "Message is too long"),
+});
+
 const Contact = () => {
+  const dispatch = useDispatch();
+
   const contactItems = [
     {
       icon: <FaMapMarkerAlt className="text-pink-600 text-xl" />,
@@ -132,96 +154,135 @@ const Contact = () => {
               <h2 className="text-2xl font-bold text-gray-800 mb-6">
                 Send Us a Message
               </h2>
-              <form className="space-y-6">
-                <fieldset className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Formik
+                initialValues={{
+                  name: "",
+                  phone: "",
+                  email: "",
+                  service: "",
+                  message: "",
+                }}
+                validationSchema={validationSchema}
+                onSubmit={(values, actions) => {
+                  dispatch(setFormValues(values));
+                  alert("Form submitted!");
+
+                  actions.resetForm();
+                }}
+              >
+                <Form className="space-y-6">
+                  <fieldset className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-gray-700 font-medium mb-2">
+                        Full name
+                      </label>
+                      <Field
+                        type="text"
+                        id="name"
+                        name="name"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2
+                      focus:ring-pink-500 focus:border-transparent"
+                        placeholder="Your name"
+                      />
+                      <ErrorMessage
+                        name="name"
+                        component="div"
+                        className="text-red-600 mt-1"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-gray-700 font-medium mb-2">
+                        Phone Number
+                      </label>
+                      <Field
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2
+                      focus:ring-pink-500 focus:border-transparent"
+                        placeholder="+44 XX XXX XXX"
+                      />
+                      <ErrorMessage
+                        name="phone"
+                        component="div"
+                        className="text-red-600 mt-1"
+                      />
+                    </div>
+                  </fieldset>
                   <div>
                     <label className="block text-gray-700 font-medium mb-2">
-                      Full name
+                      Email Address
                     </label>
-                    <input
-                      type="text"
-                      id="name"
-                      name="name"
+                    <Field
+                      type="email"
+                      id="email"
+                      name="email"
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2
                       focus:ring-pink-500 focus:border-transparent"
-                      placeholder="Your name"
-                      required
+                      placeholder="your@email.com"
+                    />
+                    <ErrorMessage
+                      name="email"
+                      component="div"
+                      className="text-red-600 mt-1"
                     />
                   </div>
                   <div>
                     <label className="block text-gray-700 font-medium mb-2">
-                      Phone Number
+                      Service Intersted In
                     </label>
-                    <input
-                      type="tel"
-                      id="phone"
-                      name="phone"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2
-                      focus:ring-pink-500 focus:border-transparent"
-                      placeholder="+44 XX XXX XXX"
-                      required
-                    />
-                  </div>
-                </fieldset>
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2
-                      focus:ring-pink-500 focus:border-transparent"
-                    placeholder="your@email.com"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">
-                    Sevice Intersted In
-                  </label>
-                  <select>
-                    <input
+
+                    <Field
+                      as="select"
                       id="service"
                       name="service"
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2
                       focus:ring-pink-500 focus:border-transparent"
-                      required
+                    >
+                      <option value="">Select service</option>
+                      {services.map((service) => (
+                        <option key={service.value} value={service.value}>
+                          {service.label}
+                        </option>
+                      ))}
+                    </Field>
+                    <ErrorMessage
+                      name="service"
+                      component="div"
+                      className="text-red-600 mt-1"
                     />
-                    <option value="">Select service</option>
-                    {services.map((service) => (
-                      <option key={service.value} value={service.value}>
-                        {service.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-gray-700 font-medium mb-2">
-                    Your Message
-                  </label>
-                  <textarea
-                    id="message"
-                    name="message"
-                    rows="5"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 font-medium mb-2">
+                      Your Message
+                    </label>
+                    <Field
+                      as="textarea"
+                      id="message"
+                      name="message"
+                      rows="5"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2
                       focus:ring-pink-500 focus:border-transparent"
-                    placeholder="Tell us about your concerns or question"
-                    required
-                  />
-                </div>
-                <div>
-                  <button
-                    type="submit"
-                    className=" bg-pink-700 text-white px-8 py-3 rounded-full
+                      placeholder="Tell us about your concerns or question"
+                    />
+                    <ErrorMessage
+                      name="message"
+                      component="div"
+                      className="text-red-600 mt-1"
+                    />
+                  </div>
+                  <div>
+                    <button
+                      type="submit"
+                      className=" bg-pink-700 text-white px-8 py-3 rounded-full
                     transition shadow-lg w-full md:w-auto"
-                    aria-label="Submit contact from"
-                  >
-                    Send Message
-                  </button>
-                </div>
-              </form>
+                      aria-label="Submit contact from"
+                    >
+                      Send Message
+                    </button>
+                  </div>
+                </Form>
+              </Formik>
             </div>
           </section>
         </main>

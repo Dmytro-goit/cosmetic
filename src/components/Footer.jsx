@@ -1,4 +1,5 @@
-import React from "react";
+import * as yup from "yup";
+import { Formik, Field, ErrorMessage, Form } from "formik";
 import {
   FaClinicMedical,
   FaFacebookF,
@@ -8,6 +9,13 @@ import {
   FaYoutube,
 } from "react-icons/fa";
 import { MdAccessTime, MdEmail, MdLocationOn, MdPhone } from "react-icons/md";
+
+const validationShcema = yup.object().shape({
+  email: yup
+    .string()
+    .email("Invalid email address")
+    .required("Email is required"),
+});
 
 const Footer = () => {
   const socialLinks = [
@@ -161,26 +169,43 @@ const Footer = () => {
                 Get updates on special offers and beauty tips
               </p>
             </div>
-            <form
-              className="flex flex-col sm:flex-row w-full lg:w-auto"
-              aria-label="Newsletter sub form"
+            <Formik
+              initialValues={{ email: "" }}
+              validationSchema={validationShcema}
+              onSubmit={(values, actions) => {
+                alert(`Subscribed with ${values.email}`);
+                actions.resetForm();
+              }}
             >
-              <label className="sr-only">Your email address</label>
-              <input
-                type="email"
-                placeholder="Your email address"
-                className="px-6 py-3 rounded-full bg-gray-700 text-white focus:outline-none
+              {({ isSubmitting }) => (
+                <Form
+                  className="flex flex-col sm:flex-row w-full lg:w-auto"
+                  aria-label="Newsletter sub form"
+                >
+                  <label className="sr-only">Your email address</label>
+                  <Field
+                    name="email"
+                    type="email"
+                    placeholder="Your email address"
+                    className="px-6 py-3 rounded-full bg-gray-700 text-white focus:outline-none
                             focus:ring-2 focus:ring-pink-500 mb-3 sm:mb-0 sm:mr-4 w-full"
-                required
-              />
-              <button
-                type="submit"
-                className="bg-pink-600 hover:bg-pink-700 text-white px-8 py-3 rounded-full 
+                  />
+                  <ErrorMessage
+                    name="email"
+                    component="div"
+                    className="text-red-500 text-sm mt-1"
+                  />
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="bg-pink-600 hover:bg-pink-700 text-white px-8 py-3 rounded-full 
                             transition shadow-lg whitespace-nowrap"
-              >
-                Subscribe
-              </button>
-            </form>
+                  >
+                    Subscribe
+                  </button>
+                </Form>
+              )}
+            </Formik>
           </div>
         </section>
         <footer className="pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center">
